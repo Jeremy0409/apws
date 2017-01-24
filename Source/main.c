@@ -74,7 +74,7 @@ void mem_write(unsigned char data, unsigned char addr)
     
     EECON1 = 0x04; // Allows write to EERPOM
     
-    // According to the PIC18F4550, the next 4 lines of are required. (Page 95/438)
+    // According to the PIC18F4550 data sheet, the next 4 lines of are required. (Page 95/438)
     EECON2 = 0x55;
     __delay_ms(50);
     EECON2 = 0xaa;
