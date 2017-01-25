@@ -105,10 +105,10 @@ char get_key(unsigned char port, unsigned char data_avail)
     char key;
     const unsigned char lookup[] = "123F456E789DA0BC "; 
     
-    while(key == 0); // Wait for key press
+    while(data_avail == 0); // Wait for key press
     key = port & 0x0F;
     
-    while(key == 1); // Key has been released
+    while(data_avail == 1); // Key has been released
     return lookup[key];
     
 }
