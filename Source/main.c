@@ -9,7 +9,7 @@
 #include "DS1302.h"
 #include "lcd.h"
 
-// Pin define for LCD library
+// Pin defines for LCD library
 LCD display = {&PORTD, 6, 5, 4, 0, 1, 2, 3}; // PORT, RS, WR, EN and data pins
 
 // Pin defines for RTC
@@ -21,12 +21,19 @@ LCD display = {&PORTD, 6, 5, 4, 0, 1, 2, 3}; // PORT, RS, WR, EN and data pins
 #define MUSIC_PLAY PORTAbits.RA3 // Play/Stop button for music module
 #define MUSIC_BUSY PORTAbits.RA4 // Busy input from music module
 
+// Pin defines for keypad
+#define KEYPAD_PORT PORTB
+#define KEYPAD_DATA_AVAIL PORTBbits.RB5
+
 // Pin define for pump control board
 #define PUMP_CTL PORTEbits.RE0
 
 // Function Prototypes
 unsigned char mem_read(unsigned char addr); // Checks data EEPROM for existing data
 void mem_write(unsigned char data, unsigned char addr); // Writes data to data EEPROM
+char get_key(unsigned char port, unsigned char data_avail); // Gets key from keypad
+
+// Variable/array declarations
 
 
 void main()
@@ -41,9 +48,11 @@ void main()
    {
        // No data. Let's ask the user to input data.
        lcd_pos(0,1);
-       lcd_writeline("Press C to continue.");
-       
+       lcd_write_line("Press C to continue.");
+       while(get_key(KEYPAD_PORT, KEYPAD_DATA_AVAIL) != 'C');
        lcd_clear();
+       
+       
        
        
    }
@@ -74,7 +83,7 @@ void mem_write(unsigned char data, unsigned char addr)
     
     EECON1 = 0x04; // Allows write to EERPOM
     
-    // According to the PIC18F4550, the next 4 lines of are required. (Page 95/438)
+    // According to the PIC18F4550 data sheet, the next 4 lines of are required. (Page 95/438)
     EECON2 = 0x55;
     __delay_ms(50);
     EECON2 = 0xaa;
@@ -89,4 +98,17 @@ void mem_write(unsigned char data, unsigned char addr)
     EEIF = 0; // Clear EEIF Interrupt Flag
     
     EECON1 = 0x00; // Disable write to EEPROM
+}
+
+char get_key(unsigned char port, unsigned char data_avail)
+{
+    char key;
+    const unsigned char lookup[] = "123F456E789DA0BC "; 
+    
+    while(key == 0); // Wait for key press
+    key = port & 0x0F;
+    
+    while(key == 1); // Key has been released
+    return lookup[key];
+    
 }

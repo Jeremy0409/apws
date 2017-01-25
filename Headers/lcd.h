@@ -25,8 +25,8 @@ extern LCD *lcd;
 
 void lcd_init(LCD lcd);
 void lcd_write_cmd(unsigned char cmd);
-void lcd_writechar(unsigned char data);
-void lcd_writeline(unsigned char data[]);
+void lcd_write_char(unsigned char data);
+void lcd_write_line(unsigned char data[]);
 void lcd_pos(int x, int y);
 void lcd_clear();
 
