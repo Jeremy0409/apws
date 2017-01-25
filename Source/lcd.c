@@ -4,6 +4,7 @@
 
 #include "lcd.h" 
 
+LCD lcd_var;
 
 // This function initializes the LCD screen
 void lcd_init(LCD lcd)
@@ -40,11 +41,24 @@ void lcd_init(LCD lcd)
     lcd.EN = 0;
     lcd.WR = 0; // Set LCD in write mode
     lcd.RS = 0; // Set LCD in command mode
+    
+    lcd_var = lcd; // Set lcd_var so that other functions can work 
+    
+    
+    __delay_ms(30); // Let the display supply voltage settle.
+
+    lcd_write_cmd(0x28); // Function Set instruction				 
+    lcd_write_cmd(0x0E); // Display On/Off Control instruction
+    lcd_write_cmd(0x06); // Entry Mode Set instruction
+    lcd_write_cmd(0x01); // Clear Display instruction
+    __delay_ms(10);	
 }
 
 // This function writes a command to the LCD device.
 void lcd_write_cmd(unsigned char cmd)
 {
+    
+    
     
 }
 
@@ -59,7 +73,7 @@ void lcd_write_line(unsigned char data[])
     int msg_cnt;
     for(msg_cnt = 0; data[msg_cnt] != '\0'; msg_cnt++)
     {
-        char print_var = data[msg_cnt];
+        // char print_var = data[msg_cnt]; is this necessary?
         lcd_write_char(data[msg_cnt]);
     }
 }
@@ -77,6 +91,15 @@ void lcd_pos(int x, int y)
     {
         lcd_write_cmd(0xC0 + y);
     }
+}
+
+// This function strobes the LCD's EN pin.
+void lcd_strobe()
+{
+    lcd_var.EN = 0; 
+    __delay_us(100);
+    lcd_var.EN = 1;
+    __delay_us(100);
 }
 
 // This function clears the LCD display
