@@ -4,7 +4,7 @@
 
 #include "lcd.h" 
 
-LCD lcd_var;
+LCD lcd_var; // Internal variable so that functions can work with the LCD.
 
 // This function initializes the LCD screen
 void lcd_init(LCD lcd)
@@ -48,7 +48,7 @@ void lcd_init(LCD lcd)
     __delay_ms(30); // Let the display supply voltage settle.
 
     lcd_write_cmd(0x28); // Function Set instruction				 
-    lcd_write_cmd(0x0E); // Display On/Off Control instruction
+    lcd_write_cmd(0x0e); // Display On/Off Control instruction
     lcd_write_cmd(0x06); // Entry Mode Set instruction
     lcd_write_cmd(0x01); // Clear Display instruction
     __delay_ms(10);	
@@ -57,14 +57,50 @@ void lcd_init(LCD lcd)
 // This function writes a command to the LCD device.
 void lcd_write_cmd(unsigned char cmd)
 {
+    unsigned char cmd_var;
     
+    lcd_var.RS = 0;
+    __delay_us(40); // Let LCD settle down 
     
+    cmd_var = cmd;
+    cmd_var = cmd_var >> 4;	// Output upper 4 bits, by shifting out lower 4 bits
+    lcd_var.PORT = cmd_var & 0x0f; // Output to port
+    __delay_us(1000); 
+    lcd_strobe();
+    __delay_us(1000);			
+
+    // Note: The code provided by the school repeats the above chunk of
+    // code again. Re-implement if necessary. 
     
 }
 
 void lcd_write_char(unsigned char data)
 {
-    
+    unsigned char data_var;
+
+    lcd_var.RS = 1;	// Select data mode			
+    __delay_us(40);	// Let LCD settle down		
+
+    data_var = data;
+    data_var = data_var >> 4;
+    lcd_var.PORT = data_var & 0x0f;
+    __delay_us(1000);
+
+    lcd_var.RS = 1;
+    __delay_us(1000);			
+
+    lcd_strobe();
+    __delay_us(1000);
+
+    data_var = data;
+    lcd_var.PORT = data_var & 0x0f;
+    __delay_us(1000);
+
+    lcd_var.RS = 1;
+    __delay_us(1000); 			
+
+    lcd_strobe();
+    __delay_us(1000);
 }
 
 
