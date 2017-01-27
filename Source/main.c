@@ -47,7 +47,7 @@ void main()
    if(sizeof(mem_read(0x00)) == 0)
    {
        // No data. Let's ask the user to input data.
-       lcd_pos(0,1);
+       lcd_pos(1,0); // Line 1, col. 0
        lcd_write_line("Press C to continue.");
        while(get_key(KEYPAD_PORT, KEYPAD_DATA_AVAIL) != 'C');
        lcd_clear();
