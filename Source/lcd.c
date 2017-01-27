@@ -44,8 +44,10 @@ void lcd_init(LCD lcd)
     
     lcd_var = lcd; // Set lcd_var so that other functions can work 
     
-    
-    __delay_ms(30); // Let the display supply voltage settle.
+    // Apparently, these 2 lines are needed to ensure proper operation
+    // of the LCD display. I have not found out why yet though.
+    lcd_write_cmd(0x33);
+    lcd_write_cmd(0x32);
 
     lcd_write_cmd(0x28); // Function Set instruction				 
     lcd_write_cmd(0x0e); // Display On/Off Control instruction
