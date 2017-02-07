@@ -13,52 +13,7 @@
 #define LCD_WR PORTDbits.RD5    //  Write on LCD controller
 void lcd_strobe(void);
 
-<<<<<<< HEAD
 //--- Function for writing a command byte to the LCD in 4 bit mode -------------
-=======
-// This function initializes the LCD screen
-void lcd_init(LCD lcd)
-{
-    
-    // Let's check which port is being used for the LCD
-    // display, and we will set that port as an output.
-    if(lcd.PORT == &PORTA) 
-    {
-        TRISA = 0x00;
-        PORTA = 0x00;
-    }
-    else if(lcd.PORT == &PORTB) 
-    {
-        TRISB = 0x00;
-        PORTB = 0x00;
-    }
-    else if(lcd.PORT == &PORTC) 
-    {
-        TRISC = 0x00;
-        PORTC = 0x00;
-    }
-    else if(lcd.PORT == &PORTD) 
-    {
-        TRISD = 0x00;
-        PORTD = 0x00;
-    }
-    else if(lcd.PORT == &PORTE) 
-    {
-        TRISE = 0x00;
-        PORTE = 0x00;
-    }
-    
-    lcd.EN = 0;
-    lcd.WR = 0; // Set LCD in write mode
-    lcd.RS = 0; // Set LCD in command mode
-    
-    lcd_var = lcd; // Set lcd_var so that other functions can work 
-    
-    // Apparently, these 2 lines are needed to ensure proper operation
-    // of the LCD display. I have not found out why yet though.
-    lcd_write_cmd(0x33);
-    lcd_write_cmd(0x32);
->>>>>>> origin/master
 
 void lcd_write_cmd(unsigned char cmd)
 {
@@ -188,21 +143,3 @@ void lcd_pos(int x, int y)
         lcd_write_cmd(0xC0 + y);
     }
 }
-<<<<<<< HEAD
-=======
-
-// This function strobes the LCD's EN pin.
-void lcd_strobe()
-{
-    lcd_var.EN = 0; 
-    __delay_us(100);
-    lcd_var.EN = 1;
-    __delay_us(100);
-}
-
-// This function clears the LCD display
-void lcd_clear()
-{
-    lcd_write_cmd(0x01); // Clear instruction
-}
->>>>>>> origin/master
