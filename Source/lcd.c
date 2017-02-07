@@ -122,7 +122,7 @@ void lcd_write_line(unsigned char data[])
     int msg_cnt;
     for(msg_cnt = 0; data[msg_cnt] != '\0'; msg_cnt++)
     {
-        // char print_var = data[msg_cnt]; is this necessary?
+        
         lcd_write_data(data[msg_cnt]);
     }
 }

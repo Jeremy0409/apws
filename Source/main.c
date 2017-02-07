@@ -32,7 +32,7 @@
 // Function Prototypes
 unsigned char mem_read(unsigned char addr); // Checks data EEPROM for existing data
 void mem_write(unsigned char data, unsigned char addr); // Writes data to data EEPROM
-char get_key(unsigned char port, unsigned char data_avail); // Gets key from keypad
+char get_key(); // Gets key from keypad
 void test_func(unsigned char *port, unsigned char pin);
 
 // Variable/array declarations
@@ -41,10 +41,11 @@ void test_func(unsigned char *port, unsigned char pin);
 void main()
 {
    // Let us initialize all hardware to be used.
-  // ds1302_init(CE, CLK, DAT); // Initialize DS1320 RTC.
+   // ds1302_init(CE, CLK, DAT); // Initialize DS1320 RTC.
    //lcd_init(display); // Initialize LCD
-  
-  
+    ADCON1 = 0x0F; // Set analog pins to digital
+    TRISB = 0xff;
+    
     
     lcd_init();
     lcd_write_line("First line");
@@ -53,18 +54,20 @@ void main()
     __delay_ms(1000);
     lcd_clear();
     
+    mem_write(0x30,0x0F);
+    
    // Let's check if there's any user configuration
    // data stored in the microcontroller
-   if(mem_read(0x0F) == 0)
+   if(mem_read(0x0F) == 0x30)
    {
        // No data. Let's ask the user to input data.
        //lcd_pos(0,1);
        //lcd_write_char('c');
        // No data. Let's ask the user to input data.
        lcd_write_line("Press C to continue.");
-       while(get_key(KEYPAD_PORT, KEYPAD_DATA_AVAIL) != 'C');
+       while(get_key() != 'C');
        lcd_clear();
-       lcd_pos(2,0);
+       lcd_pos(1,0);
        lcd_write_line("Test");
        
        
@@ -77,7 +80,7 @@ void main()
        lcd_pos(1,0);
        lcd_write_line("Character is: ");
        lcd_pos(2,0);
-       lcd_write_line(mem_read(0x0F)); 
+       lcd_write_data(mem_read(0x0F)); 
        
        __delay_ms(2000);
        __delay_ms(2000);
@@ -99,8 +102,10 @@ unsigned char mem_read(unsigned char addr)
 {
     // Read from microcontroller Data EEPROM
     EEADR = addr;
+    EEPGD = 0;
+    CFGS = 0;
     RD = 1; // Set EEPROM read
-    while (RD==1); 
+    //while (RD==1); 
     return EEDATA;
 }
 
@@ -116,24 +121,27 @@ void mem_write(char data, unsigned char addr)
     __delay_ms(50);
     
     // Write to microcontroller Data EEPROM
+    EEPGD = 0;
+    CFGS = 0;
     EEADR = addr;
     EEDATA = data;
-    WR = 1;
+    WREN = 1;
    // Wait for the byte to be written in EEPROM
-    while(EEIF == 0);
+    //while(EEIF == 0);
     EEIF = 0; // Clear EEIF Interrupt Flag
-    EECON1 = 0x00; // Disable write to EEPROM
+    //EECON1 = 0x00; // Disable write to EEPROM
+    WREN =0;
 }
 
-char get_key(unsigned char port, unsigned char data_avail)
+char get_key()
 {
     char key;
     const unsigned char lookup[] = "123F456E789DA0BC "; 
     
-    while(data_avail == 0); // Wait for key press
-    key = port & 0x0F;
+    while(PORTBbits.RB5 == 0); // Wait for key press
+    key = PORTB & 0x0F;
     
-    while(data_avail == 1); // Key has been released
+    while(PORTBbits.RB5 == 1); // Key has been released
     return lookup[key];
     
 }
