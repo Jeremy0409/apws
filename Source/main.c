@@ -9,8 +9,9 @@
 #include "DS1302.h"
 #include "lcd.h"
 
+// Temporarily use the school's LCD library.
 // Pin defines for LCD library
-LCD display = {&PORTD, 6, 5, 4, 0, 1, 2, 3}; // PORT, RS, WR, EN and data pins
+//LCD display = {&PORTD, 6, 5, 4, 0, 1, 2, 3}; // PORT, RS, WR, EN and data pins
 
 // Pin defines for RTC
 #define CE PORTAbits.RA0 // Note: the CE pin used to be referred to as the /RST pin.
@@ -26,12 +27,13 @@ LCD display = {&PORTD, 6, 5, 4, 0, 1, 2, 3}; // PORT, RS, WR, EN and data pins
 #define KEYPAD_DATA_AVAIL PORTBbits.RB5
 
 // Pin define for pump control board
-#define PUMP_CTL PORTEbits.RE0
+#define PUMP_CTL PORTCbits.RC0
 
 // Function Prototypes
 unsigned char mem_read(unsigned char addr); // Checks data EEPROM for existing data
 void mem_write(unsigned char data, unsigned char addr); // Writes data to data EEPROM
 char get_key(unsigned char port, unsigned char data_avail); // Gets key from keypad
+void test_func(unsigned char *port, unsigned char pin);
 
 // Variable/array declarations
 
@@ -39,18 +41,31 @@ char get_key(unsigned char port, unsigned char data_avail); // Gets key from key
 void main()
 {
    // Let us initialize all hardware to be used.
-   ds1302_init(CE, CLK, DAT); // Initialize DS1320 RTC.
-   lcd_init(display); // Initialize LCD
-   
+  // ds1302_init(CE, CLK, DAT); // Initialize DS1320 RTC.
+   //lcd_init(display); // Initialize LCD
+  
+  
+    
+    lcd_init();
+    lcd_write_line("First line");
+    lcd_pos(2,0);
+    lcd_write_line("Second line");
+    __delay_ms(1000);
+    lcd_clear();
+    
    // Let's check if there's any user configuration
    // data stored in the microcontroller
-   if(sizeof(mem_read(0x00)) == 0)
+   if(mem_read(0x0F) == 0)
    {
        // No data. Let's ask the user to input data.
-       lcd_pos(0,1);
+       //lcd_pos(0,1);
+       //lcd_write_char('c');
+       // No data. Let's ask the user to input data.
        lcd_write_line("Press C to continue.");
        while(get_key(KEYPAD_PORT, KEYPAD_DATA_AVAIL) != 'C');
        lcd_clear();
+       lcd_pos(2,0);
+       lcd_write_line("Test");
        
        
        
@@ -59,11 +74,22 @@ void main()
    else
    {
        // Data exists. Load the data from memory.
-       mem_read(0x00); 
-   }
+       lcd_pos(1,0);
+       lcd_write_line("Character is: ");
+       lcd_pos(2,0);
+       lcd_write_line(mem_read(0x0F)); 
+       
+       __delay_ms(2000);
+       __delay_ms(2000);
    
-   while(1) 
+   }
+    
+    while(1) 
    {
+       // TODO: Do a polling check on the DS1302, and see if the time and date
+       // is equal to the data on the DS1302. If so, then let's start the pump 
+       // play music. 
+       
        
        
    }
@@ -78,7 +104,7 @@ unsigned char mem_read(unsigned char addr)
     return EEDATA;
 }
 
-void mem_write(unsigned char data, unsigned char addr)
+void mem_write(char data, unsigned char addr)
 {
     
     EECON1 = 0x04; // Allows write to EERPOM
@@ -96,7 +122,6 @@ void mem_write(unsigned char data, unsigned char addr)
    // Wait for the byte to be written in EEPROM
     while(EEIF == 0);
     EEIF = 0; // Clear EEIF Interrupt Flag
-    
     EECON1 = 0x00; // Disable write to EEPROM
 }
 
@@ -110,5 +135,19 @@ char get_key(unsigned char port, unsigned char data_avail)
     
     while(data_avail == 1); // Key has been released
     return lookup[key];
+    
+}
+
+// This test function tests the ability to pass
+// ports and pins as arguments to a function
+void test_func(unsigned char *port, unsigned char pin)
+{
+    char Mask[] = {1,2,4,8,16,32,64,128};
+     *port |= Mask[pin]; // set pin# to 1 (turn on)
+     __delay_ms(30);
+    
+     *port &= ~Mask[pin]; // set pin# to 0 (turn off)
+     __delay_ms(30);
+    
     
 }
